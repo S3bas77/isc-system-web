@@ -1,2 +1,12 @@
 #!/bin/sh
-npx --no -- commitlint --edit "$1"
+. "$(dirname "$0")/_/husky.sh"
+
+# Archivo que contiene el mensaje de commit
+commit_msg_file=$1
+
+# Verifica si ya tiene marcador
+if ! grep -q '\[husky-verified:' "$commit_msg_file"; then
+  timestamp=$(date -u +"%Y%m%dT%H%M%SZ")
+  random=$(hexdump -n 3 -e '3/1 "%02X"' /dev/urandom 2>/dev/null || echo $RANDOM)
+  echo "[husky-verified:${timestamp}:${random}]" >> "$commit_msg_file"
+fi
