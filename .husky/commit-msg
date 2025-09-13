@@ -1,4 +1,4 @@
-
+npx --no -- commitlint --edit "$1"
 
 # Archivo que contiene el mensaje de commit
 commit_msg_file=$1
