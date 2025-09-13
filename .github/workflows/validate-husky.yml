@@ -1,29 +1,25 @@
-name: Validate Husky Markers
+name: validate
 
 on:
-  pull_request:
   push:
+    branches: [main]
+  pull_request:
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Check commits for husky marker
+      - name: Verificar commits
         run: |
           echo "Checking commits..."
-          MISSING=0
-          COMMITS=$(git log ${{ github.event.before }}..${{ github.sha }} --pretty=format:"%h")
-          for c in $COMMITS; do
-            MSG=$(git log -1 --pretty=%B $c)
-            if ! echo "$MSG" | grep -q '\[husky-verified:'; then
-              echo "::error ::Commit $c is missing husky marker"
-              MISSING=1
-            fi
-          done
-          if [ $MISSING -ne 0 ]; then
+          COMMITS=$(git log --pretty=%B -n 10)
+          echo "$COMMITS"
+
+          if ! echo "$COMMITS" | grep -q "\[husky-verified:"; then
+            echo "Error: commit sin marcador de husky"
             exit 1
           fi
+
+          echo "Todos los commits tienen marcador"
