@@ -18,7 +18,7 @@ jobs:
 
       - name: Check commits for husky marker
         run: |
-          echo "🔍 Revisando commits entre ${{ github.event.before }} y ${{ github.sha }}"
+          echo "Revisando commits entre ${{ github.event.before }} y ${{ github.sha }}"
 
           # obtener commits del rango
           COMMITS=$(git log ${{ github.event.before }}..${{ github.sha }} --pretty=format:"%h")
