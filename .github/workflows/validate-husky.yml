@@ -1,25 +1,53 @@
-name: validate
+name: Validate Husky Marker
 
 on:
   push:
-    branches: [main]
+    branches:
+      - '**'
   pull_request:
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Verificar commits
+      - name: Check commits for husky marker
         run: |
-          echo "Checking commits..."
-          COMMITS=$(git log --pretty=%B -n 10)
-          echo "$COMMITS"
+          echo "🔍 Revisando commits entre ${{ github.event.before }} y ${{ github.sha }}"
 
-          if ! echo "$COMMITS" | grep -q "\[husky-verified:"; then
-            echo "Error: commit sin marcador de husky"
+          # obtener commits del rango
+          COMMITS=$(git log ${{ github.event.before }}..${{ github.sha }} --pretty=format:"%h")
+
+          if [ -z "$COMMITS" ]; then
+            echo "No hay commits para revisar."
+            exit 0
+          fi
+
+          echo "Commits encontrados: $COMMITS"
+          echo ""
+
+          MISSING=0
+          for c in $COMMITS; do
+            MSG=$(git log -1 --pretty=%B $c)
+            echo "Revisando commit $c"
+            echo "$MSG"
+            echo "---"
+            if ! echo "$MSG" | grep -q "\[husky-verified:"; then
+              echo "::error ::Commit $c no contiene el marcador [husky-verified:...]"
+              MISSING=1
+            else
+              echo "Commit $c tiene el marcador"
+            fi
+            echo ""
+          done
+
+          if [ $MISSING -ne 0 ]; then
+            echo "Se detectaron commits sin el marcador husky."
             exit 1
           fi
 
-          echo "Todos los commits tienen marcador"
+          echo "Todos los commits contienen el marcador husky."
