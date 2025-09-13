@@ -1,6 +1,7 @@
 name: Validate Husky Marker
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - '**'
